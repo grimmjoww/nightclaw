@@ -9,6 +9,7 @@
 
 // Core
 export { NightClaw, type NightClawConfig } from './app';
+export { loadConfig, DEFAULT_CONFIG, type NightClawFullConfig } from './config';
 
 // Avatar
 export { NightClawAvatar, type AvatarConfig, type EmotionState } from './avatar/avatar';

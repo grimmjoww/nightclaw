@@ -1,0 +1,61 @@
+{
+  "_comment": "NightClaw Configuration — Edit this to customize your companion",
+  "_guide": "See SETUP-FOR-AI.md for full instructions",
+
+  "companion": {
+    "name": "Your Companion's Name",
+    "soulPath": "./SOUL.md",
+    "pronouns": "she/her"
+  },
+
+  "llm": {
+    "provider": "openclaw",
+    "config": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "gatewayUrl": "http://localhost:18789",
+      "gatewayToken": "your-gateway-token-here",
+      "temperature": 0.8
+    }
+  },
+
+  "voice": {
+    "enabled": false,
+    "tts": {
+      "provider": "s1-mini",
+      "url": "http://127.0.0.1:8090",
+      "voicePreset": "default"
+    },
+    "stt": {
+      "provider": "whisper-local",
+      "url": "http://127.0.0.1:8080"
+    },
+    "mode": "push-to-talk"
+  },
+
+  "avatar": {
+    "modelPath": "./models/default.vrm",
+    "modelsDirectory": "./models",
+    "nsfwEnabled": false,
+    "environment": "cozy-apartment"
+  },
+
+  "memory": {
+    "provider": "akasha",
+    "autoRecall": true,
+    "autoCapture": true
+  },
+
+  "discord": {
+    "enabled": false,
+    "token": "",
+    "guildId": ""
+  },
+
+  "features": {
+    "screenAwareness": true,
+    "dreamJournal": true,
+    "moodLighting": true,
+    "visionReactions": false,
+    "whisperMode": false
+  }
+}
