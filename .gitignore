@@ -1,0 +1,11 @@
+node_modules/
+dist/
+target/
+.env
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store
+Thumbs.db
+*.log
+src-tauri/target/
