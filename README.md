@@ -58,7 +58,7 @@ The name **"God Rei"** is a triple joke: *god ray* (the graphics lighting term) 
 npm install -g nightclaw
 nightclaw onboard
 # Or from source:
-git clone https://github.com/williescode/nightclaw.git
+git clone https://github.com/grimmjoww/nightclaw.git
 cd nightclaw && npm install && npm run tauri dev
 ```
 
