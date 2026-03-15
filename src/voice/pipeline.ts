@@ -235,12 +235,12 @@ export class VoicePipeline {
   }
 
   private async fishS2TTS(text: string, emotion: string): Promise<string> {
-    // Fish Audio S2 supports inline natural language emotion tags
-    // Reference: https://github.com/fishaudio/fish-speech
-    // This is the SOTA TTS model — beats all closed-source systems on benchmarks
+    // Fish Audio S2 — SOTA TTS with inline natural language emotion tags
+    // Reference: github.com/fishaudio/fish-speech (tools/server/views.py)
+    // API: POST /v1/tts with ServeTTSRequest schema
+    // Voice cloning via reference_id (pre-registered) or inline references
     let taggedText = text;
     if (emotion) {
-      // Map emotion names to natural language tags Fish S2 understands
       const emotionTags: Record<string, string> = {
         happy: '[cheerful, warm tone]',
         sad: '[soft, melancholy tone]',
@@ -257,19 +257,57 @@ export class VoicePipeline {
       taggedText = `${tag} ${text}`;
     }
 
+    // Fish S2 returns raw audio bytes, not JSON
+    // Uses reference_id for pre-registered voice clones
+    // Register voices via POST /v1/references/add first
     const response = await fetch(`${this.config.s1miniUrl}/v1/tts`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/msgpack' },
       body: JSON.stringify({
         text: taggedText,
         format: 'wav',
         streaming: false,
-        // Reference audio for voice cloning handled by server config
+        reference_id: this.config.voicePreset || null,
+        normalize: true,
+        temperature: 0.8,
+        top_p: 0.8,
+        repetition_penalty: 1.1,
+        max_new_tokens: 1024,
+        chunk_length: 200,
       })
     });
 
+    if (!response.ok) {
+      throw new Error(`Fish S2 TTS failed: ${response.status}`);
+    }
+
+    // Response is raw audio bytes
     const audioBlob = await response.blob();
     return URL.createObjectURL(audioBlob);
+  }
+
+  /**
+   * Register a voice reference with Fish S2 for voice cloning.
+   * Call this once with your reference audio, then use the ID in TTS calls.
+   * API: POST /v1/references/add
+   */
+  async registerVoiceReference(id: string, audioBlob: Blob, text: string): Promise<void> {
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('audio', audioBlob, 'reference.wav');
+    formData.append('text', text);
+
+    const response = await fetch(`${this.config.s1miniUrl}/v1/references/add`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Failed to register voice reference: ${err}`);
+    }
+
+    console.log(`[NightClaw Voice] Registered voice reference: ${id}`);
   }
 
   private async s1miniTTS(text: string, emotion: string): Promise<string> {
