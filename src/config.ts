@@ -48,7 +48,7 @@ export interface LLMConfig {
 export interface VoiceConfig {
   enabled: boolean;
   tts: {
-    provider: 's1-mini' | 'elevenlabs' | 'sherpa-onnx' | 'openai' | 'none';
+    provider: 'fish-s2' | 's1-mini' | 'elevenlabs' | 'sherpa-onnx' | 'openai' | 'none';
     url?: string;
     apiKey?: string;
     voicePreset?: string;

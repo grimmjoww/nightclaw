@@ -21,9 +21,10 @@
   "voice": {
     "enabled": false,
     "tts": {
-      "provider": "s1-mini",
+      "provider": "fish-s2",
       "url": "http://127.0.0.1:8090",
-      "voicePreset": "default"
+      "voicePreset": "default",
+      "_comment_tts": "fish-s2 is recommended (SOTA). Also supports: s1-mini, elevenlabs, sherpa-onnx, openai"
     },
     "stt": {
       "provider": "whisper-local",

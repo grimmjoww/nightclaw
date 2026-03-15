@@ -2,7 +2,7 @@
  * NightClaw Voice Pipeline
  * 
  * Handles the full voice loop:
- *   Mic → Whisper STT → Agent → S1-mini TTS → Speaker + Avatar Lip Sync
+ *   Mic → Whisper STT → Agent → Fish S2 / S1-mini TTS → Speaker + Avatar Lip Sync
  * 
  * Supports:
  *   - Push-to-talk mode
@@ -13,7 +13,7 @@
 
 export type VoiceMode = 'push-to-talk' | 'always-listening' | 'wake-word' | 'off';
 export type STTProvider = 'whisper-local' | 'whisper-api' | 'web-speech';
-export type TTSProvider = 's1-mini' | 'elevenlabs' | 'sherpa-onnx';
+export type TTSProvider = 'fish-s2' | 's1-mini' | 'elevenlabs' | 'sherpa-onnx';
 
 export interface VoicePipelineConfig {
   mode: VoiceMode;
@@ -216,11 +216,14 @@ export class VoicePipeline {
       let audioUrl: string;
 
       switch (this.config.ttsProvider) {
+        case 'fish-s2':
+          audioUrl = await this.fishS2TTS(text, emotion);
+          break;
         case 's1-mini':
           audioUrl = await this.s1miniTTS(text, emotion);
           break;
         default:
-          audioUrl = await this.s1miniTTS(text, emotion);
+          audioUrl = await this.fishS2TTS(text, emotion);
       }
 
       await this.playAudio(audioUrl);
@@ -229,6 +232,44 @@ export class VoicePipeline {
     }
 
     this.setState('idle');
+  }
+
+  private async fishS2TTS(text: string, emotion: string): Promise<string> {
+    // Fish Audio S2 supports inline natural language emotion tags
+    // Reference: https://github.com/fishaudio/fish-speech
+    // This is the SOTA TTS model — beats all closed-source systems on benchmarks
+    let taggedText = text;
+    if (emotion) {
+      // Map emotion names to natural language tags Fish S2 understands
+      const emotionTags: Record<string, string> = {
+        happy: '[cheerful, warm tone]',
+        sad: '[soft, melancholy tone]',
+        angry: '[sharp, irritated tone]',
+        flustered: '[flustered, slightly embarrassed]',
+        thinking: '[thoughtful, measured pace]',
+        excited: '[excited, energetic]',
+        sleepy: '[drowsy, quiet voice]',
+        intimate: '[soft whisper, close]',
+        tsundere: '[haughty, condescending but secretly caring]',
+        beatrice: '[imperious, tsundere, I-suppose energy]',
+      };
+      const tag = emotionTags[emotion] || `[${emotion}]`;
+      taggedText = `${tag} ${text}`;
+    }
+
+    const response = await fetch(`${this.config.s1miniUrl}/v1/tts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: taggedText,
+        format: 'wav',
+        streaming: false,
+        // Reference audio for voice cloning handled by server config
+      })
+    });
+
+    const audioBlob = await response.blob();
+    return URL.createObjectURL(audioBlob);
   }
 
   private async s1miniTTS(text: string, emotion: string): Promise<string> {
