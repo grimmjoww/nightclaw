@@ -30,10 +30,13 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "gateway": "openclaw gateway --port 18789 --verbose",
+    "download:model": "python scripts/download-fish-s2.py",
+    "fish:server": "cd fish-speech && python tools/api_server.py --listen 127.0.0.1:8080",
     "test": "vitest"
   },
   "dependencies": {
     "@pixiv/three-vrm": "^3.0.0",
+    "@msgpack/msgpack": "^3.0.0",
     "three": "^0.172.0",
     "discord.js": "^14.16.0",
     "@discordjs/voice": "^0.18.0",

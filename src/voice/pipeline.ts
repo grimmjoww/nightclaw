@@ -11,6 +11,8 @@
  *   - Whisper mode (quiet TTS for late night)
  */
 
+import { encode as msgpackEncode } from '@msgpack/msgpack';
+
 export type VoiceMode = 'push-to-talk' | 'always-listening' | 'wake-word' | 'off';
 export type STTProvider = 'whisper-local' | 'whisper-api' | 'web-speech';
 export type TTSProvider = 'fish-s2' | 's1-mini' | 'elevenlabs' | 'sherpa-onnx';
@@ -257,24 +259,36 @@ export class VoicePipeline {
       taggedText = `${tag} ${text}`;
     }
 
-    // Fish S2 returns raw audio bytes, not JSON
-    // Uses reference_id for pre-registered voice clones
-    // Register voices via POST /v1/references/add first
+    // Fish S2 uses msgpack by default (matching official api_client.py)
+    // Source: github.com/fishaudio/fish-speech tools/api_client.py
+    // Server: tools/server/api_utils.py accepts msgpack, json, multipart
+    // Schema: fish_speech/utils/schema.py ServeTTSRequest
+    // Default port: 8080
+    const payload = {
+      text: taggedText,
+      format: 'wav',
+      streaming: false,
+      reference_id: this.config.voicePreset || null,
+      references: [],
+      normalize: true,
+      temperature: 0.8,
+      top_p: 0.8,
+      repetition_penalty: 1.1,
+      max_new_tokens: 1024,
+      chunk_length: 200,
+      use_memory_cache: 'on',
+      seed: null,
+    };
+
+    const encoded = msgpackEncode(payload);
+
     const response = await fetch(`${this.config.s1miniUrl}/v1/tts`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/msgpack' },
-      body: JSON.stringify({
-        text: taggedText,
-        format: 'wav',
-        streaming: false,
-        reference_id: this.config.voicePreset || null,
-        normalize: true,
-        temperature: 0.8,
-        top_p: 0.8,
-        repetition_penalty: 1.1,
-        max_new_tokens: 1024,
-        chunk_length: 200,
-      })
+      headers: {
+        'Content-Type': 'application/msgpack',
+      },
+      body: encoded,
+    });
     });
 
     if (!response.ok) {

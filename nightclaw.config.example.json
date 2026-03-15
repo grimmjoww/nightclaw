@@ -22,7 +22,7 @@
     "enabled": false,
     "tts": {
       "provider": "fish-s2",
-      "url": "http://127.0.0.1:8090",
+      "url": "http://127.0.0.1:8080",
       "voicePreset": "default",
       "_comment_tts": "fish-s2 is recommended (SOTA). Also supports: s1-mini, elevenlabs, sherpa-onnx, openai"
     },

@@ -9,3 +9,11 @@ target/
 Thumbs.db
 *.log
 src-tauri/target/
+
+# Fish S2 model weights (11GB+ — download via scripts/download-fish-s2.py)
+fish-speech/checkpoints/
+checkpoints/
+
+# Voice reference audio (personal, not redistributed)
+voices/*/reference.wav
+voices/*/*.wav
