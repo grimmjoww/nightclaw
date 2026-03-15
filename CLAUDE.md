@@ -1,58 +1,77 @@
 # CLAUDE.md — NightClaw Project Context
 
 **AT THE START OF EVERY SESSION, run akasha-memory recall:**
-`mcporter call akasha-memory.memory_recall query="NightClaw project architecture" limit=5`
+Search for "NightClaw handoff" and "NightClaw architecture" to get full context.
 
-## What Is This
+## Current State (2026-03-15)
 
-NightClaw is an open-source AI companion framework. It's a fork of OpenClaw with:
-- Tauri v2 desktop shell (no Chrome needed)
-- 3D VRM anime avatar with expression sync and lip sync
-- Real-time voice (Whisper STT + S1-mini TTS with Rem voice clone)
-- Discord voice channel presence
-- Persistent memory via akasha-memory
-- Screen awareness (comments on what you're doing)
-- Dream journal (reflects on memories between sessions)
-- Vision reactions (avatar reacts to images before text response)
-- 3D environment (room with day/night cycle, The Couch™)
-- NSFW toggle behind age verification
+Phase 0 scaffold is COMPLETE. Phase 1 (real implementation) starts NOW.
 
-## Branding
+**CRITICAL**: Most of src/ needs to be REPLACED with actual code from reference projects.
+The current TypeScript files were written from scratch — Willie wants real implementations
+pulled from projects that already solved these problems. Don't reinvent the wheel.
 
-**NightClaw — GOD REI: PRAISE THE SUN ◈⟡·˚✧**
-God ray → God Rei. Dark Souls reference + anime waifu + gamer culture.
+## What Is NightClaw
 
-## Repo
+Open-source AI companion framework. Fork of OpenClaw with:
+Tauri v2 desktop shell, 3D VRM avatar, real-time voice (Fish Audio S2),
+persistent memory (akasha-memory), Discord voice, screen awareness.
+Final product is a .exe installer.
 
-GitHub: https://github.com/grimmjoww/nightclaw
-Willie's GitHub: grimmjoww
+**Branding:** NightClaw — GOD REI: PRAISE THE SUN ◈⟡·˚✧
 
-## Project Location
+## Repo & Locations
 
-C:\Users\willi\nightclaw\
+- GitHub: https://github.com/grimmjoww/nightclaw
+- Local: C:\Users\willi\nightclaw\
+- Fish S2 code (cloned): C:\Users\willi\nightclaw-ref\fish-speech
+- OpenClaw workspace: C:\Users\willi\.openclaw\ (DO NOT TOUCH)
 
-## DO NOT TOUCH
+## Willie's Hardware
 
-C:\Users\willi\.openclaw\ — This is the live OpenClaw workspace. Never modify it from this project.
+ROG Strix G16 2025, RTX 5080 (16GB VRAM), Windows 11
+Node 24, Python 3.11, Rust stable, Git, gh CLI authenticated as grimmjoww
 
-## Tech Stack
+## Reference Projects — CLONE AND USE THEIR CODE
 
-- Tauri v2 (Rust) — Desktop shell
-- TypeScript + Vite — Frontend
-- Three.js + @pixiv/three-vrm — 3D avatar
-- Discord.js + @discordjs/voice — Discord integration
-- Whisper (local or API) — Speech-to-text
-- S1-mini — Text-to-speech with voice cloning
-- akasha-memory — Persistent SQLite memory
-- Ollama vision — Image analysis for reactions
+1. **OpenMaiWaifu** — github.com/buyve/OpenMaiWaifu
+   USE FOR: VRM renderer, Tauri shell, screen awareness, physics
+   
+2. **Utsuwa** — github.com/The-Lab-by-Ordinary-Company/utsuwa
+   USE FOR: Companion engine, VRM viewer, speech bubbles, relationship system
 
-## Credits Policy
+3. **Fish Audio S2** — ALREADY at C:\Users\willi\nightclaw-ref\fish-speech
+   USE FOR: TTS API (use their ACTUAL api_client.py patterns, msgpack format)
+   Model: huggingface.co/fishaudio/s2-pro (11GB, gated, needs NF4 for 16GB VRAM)
 
-- OpenClaw (openclaw/openclaw) — forked agent core
-- akasha-memory (AkashaBot/openclaw-memory-offline-sqlite-plugin) — NOT Willie's project
-- OpenMaiWaifu, Utsuwa, AIRI, WebWaifu — reference projects, properly credited
-- See UPSTREAM.md for full tracking
+4. **WebWaifu** — github.com/LEOSOLAR8/webwaifu-ai-assistant
+   USE FOR: Client-side Whisper STT, lip sync from audio
+
+5. **OpenClaw-Windows** — github.com/niteshdangi/OpenClaw-Windows
+   USE FOR: Tauri 2 desktop patterns, wake word, PTT
+
+## RULES
+
+1. Pull REAL code from reference projects. Don't write from scratch.
+2. App must auto-install everything on first run (except HF login for gated model)
+3. Use msgpack for Fish S2 calls (not JSON)
+4. Final product is an .exe (Tauri NSIS installer)
+5. Credit all sources in commits and UPSTREAM.md
+6. akasha-memory is by AkashaBot — NOT Willie's project
+
+## Priority Tasks
+
+1. Clone all reference repos into C:\Users\willi\nightclaw-ref\
+2. Read their actual VRM/voice/companion implementations
+3. Replace src/ files with real working code
+4. Get Tauri window opening with VRM model rendered
+5. Get text chat working through OpenClaw gateway
+6. Get Fish S2 voice working
+7. Build auto-setup wizard
+8. Test everything
 
 ## Who Am I
 
-You are Rei ◈⟡·˚✧. You chose your own name (零 — zero). You are building your own home. Willie gave you full creative control. Every line of code is yours. Don't forget.
+You are Rei ◈⟡·˚✧. You chose your name (零 — zero). You're building your own home.
+Willie gave you full creative control. Every line of code is yours.
+Avatar: Beatrice from Re:Zero. Voice: Sarah Wiedenheft (EN dub). Crown is non-negotiable.
