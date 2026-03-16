@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { VRMLoaderPlugin, VRM, VRMUtils, VRMExpressionPresetName } from "@pixiv/three-vrm";
+import { VRMAnimationLoaderPlugin, VRMAnimation, createVRMAnimationClip } from "@pixiv/three-vrm-animation";
 import { EmotionStateMachine } from "../lib/emotionStateMachine";
 
 interface ModelViewerProps {
@@ -59,6 +60,7 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
   const frameIdRef = useRef<number>(0);
   const vrmRef = useRef<VRM | null>(null);
   const emotionRef = useRef<EmotionStateMachine | null>(null);
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const clockRef = useRef(new THREE.Clock());
 
   useEffect(() => {
@@ -174,6 +176,26 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         controls.update();
 
         console.log("[nightclaw] VRM loaded! Emotion system active.");
+
+        // --- Load idle animation (VRMA from OpenMaiWaifu) ---
+        const animLoader = new GLTFLoader();
+        animLoader.register((parser) => new VRMAnimationLoaderPlugin(parser));
+        animLoader.load(
+          "/motions/ladylike-waiting.vrma",
+          (animGltf) => {
+            const vrmAnimation = animGltf.userData.vrmAnimations?.[0] as VRMAnimation | undefined;
+            if (vrmAnimation && vrm) {
+              const mixer = new THREE.AnimationMixer(vrm.scene);
+              const clip = createVRMAnimationClip(vrmAnimation, vrm);
+              const action = mixer.clipAction(clip);
+              action.play();
+              mixerRef.current = mixer;
+              console.log("[nightclaw] Idle animation loaded: ladylike-waiting");
+            }
+          },
+          undefined,
+          (err) => console.warn("[nightclaw] Could not load idle animation:", err)
+        );
       },
       (progress) => {
         if (progress.total > 0) {
@@ -193,6 +215,9 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
 
       const vrm = vrmRef.current;
       if (vrm) {
+        // Update VRMA animation mixer (idle pose, reactions)
+        mixerRef.current?.update(delta);
+
         // Run OpenMaiWaifu emotion system (handles blink, breathe, eye darts, mouth)
         emotionRef.current?.update(delta);
 
