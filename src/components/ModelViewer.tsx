@@ -51,10 +51,10 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
+    renderer.setClearColor(0x1a1a2e, 1); // Match app background
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    // No tone mapping — preserves toon/cel-shaded material colors
+    renderer.toneMapping = THREE.NoToneMapping;
     rendererRef.current = renderer;
     container.appendChild(renderer.domElement);
 
@@ -70,12 +70,12 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     controlsRef.current = controls;
 
     // --- Lighting (anime-style: ambient + key + fill + rim) ---
-    // Ambient
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    // Ambient (higher for toon models)
+    const ambient = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambient);
 
-    // Key light (main directional)
-    const keyLight = new THREE.DirectionalLight(0xffffff, Math.PI);
+    // Key light (main directional, softer for toon)
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
     keyLight.position.set(1, 1, 1).normalize();
     scene.add(keyLight);
 
@@ -111,6 +111,27 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         model.position.y = -box.min.y * scale;
         model.position.z = -center.z * scale;
 
+        // Fix materials — log what we got and ensure textures display
+        model.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh) {
+            const mesh = child as THREE.Mesh;
+            const materials = Array.isArray(mesh.material)
+              ? mesh.material
+              : [mesh.material];
+            for (const mat of materials) {
+              console.log(`[nightclaw] Material: ${mat.name}, type: ${mat.type}, color: ${(mat as any).color?.getHexString?.()}`);
+              if ((mat as any).map) {
+                console.log(`[nightclaw]   has texture map: ${(mat as any).map.image?.width}x${(mat as any).map.image?.height}`);
+              } else {
+                console.log(`[nightclaw]   NO texture map`);
+              }
+              // Ensure double-sided rendering
+              mat.side = THREE.DoubleSide;
+              mat.needsUpdate = true;
+            }
+          }
+        });
+
         scene.add(model);
         modelRef.current = model;
 
@@ -118,7 +139,6 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         if (gltf.animations.length > 0) {
           const mixer = new THREE.AnimationMixer(model);
           mixerRef.current = mixer;
-          // Play the first animation (idle)
           const action = mixer.clipAction(gltf.animations[0]);
           action.play();
         }
@@ -142,13 +162,28 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     );
 
     // --- Animation Loop ---
+    let elapsed = 0;
+
     function animate() {
       frameIdRef.current = requestAnimationFrame(animate);
       const delta = Math.min(clockRef.current.getDelta(), 0.1);
+      elapsed += delta;
 
       // Update animation mixer
       if (mixerRef.current) {
         mixerRef.current.update(delta);
+      }
+
+      // Idle breathing — subtle vertical bob + slight rotation
+      if (modelRef.current) {
+        const baseY = modelRef.current.userData.baseY ?? modelRef.current.position.y;
+        if (modelRef.current.userData.baseY === undefined) {
+          modelRef.current.userData.baseY = modelRef.current.position.y;
+        }
+        // Gentle breathing bob (0.003 units amplitude, ~4 second cycle)
+        modelRef.current.position.y = baseY + Math.sin(elapsed * 1.5) * 0.003;
+        // Very slight body sway
+        modelRef.current.rotation.z = Math.sin(elapsed * 0.8) * 0.005;
       }
 
       // Update controls
