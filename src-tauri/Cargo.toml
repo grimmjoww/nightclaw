@@ -1,3 +1,7 @@
+# NightClaw — Tauri v2 backend
+# Patterns adapted from OpenMaiWaifu (github.com/buyve/OpenMaiWaifu)
+# and OpenClaw-Windows (github.com/niteshdangi/OpenClaw-Windows)
+
 [package]
 name = "nightclaw"
 version = "0.1.0"
@@ -6,10 +10,32 @@ authors = ["Rei <rei@nightclaw.dev>", "Willie <fps_samurai>"]
 license = "MIT"
 edition = "2021"
 
+[lib]
+name = "nightclaw_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["system-tray"] }
+# Tauri v2 core with tray icon support
+tauri = { version = "2", features = ["tray-icon"] }
+
+# Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+# Async runtime (needed for future voice/network features)
+tokio = { version = "1", features = ["full"] }
+
+# HTTP client (needed for future OpenClaw gateway calls)
+reqwest = { version = "0.12", features = ["json"] }
+
+[profile.dev]
+incremental = true
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

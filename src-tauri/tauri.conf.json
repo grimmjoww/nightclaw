@@ -1,16 +1,16 @@
 {
-  "$schema": "https://raw.githubusercontent.com/nicklason/tauri-schema/main/schema.json",
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "NightClaw",
   "version": "0.1.0",
   "identifier": "com.nightclaw.app",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev:frontend",
-    "beforeBuildCommand": "npm run build:frontend"
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
   },
   "app": {
-    "title": "NightClaw — GOD REI ◈⟡·˚✧",
+    "withGlobalTauri": true,
     "windows": [
       {
         "label": "main",
@@ -20,17 +20,13 @@
         "minWidth": 800,
         "minHeight": 600,
         "resizable": true,
-        "transparent": false,
+        "center": true,
         "decorations": true,
-        "center": true
+        "transparent": false
       }
     ],
-    "trayIcon": {
-      "iconPath": "icons/tray-icon.png",
-      "tooltip": "NightClaw — Your companion is here ◈⟡·˚✧"
-    },
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:* https://api.minimax.io; img-src 'self' data: blob:"
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws://127.0.0.1:* http://127.0.0.1:* https:; img-src 'self' data: blob: asset:; media-src 'self' data: blob: asset:"
     }
   },
   "bundle": {
