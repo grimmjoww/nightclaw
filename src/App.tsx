@@ -6,6 +6,7 @@
 // GOD REI: PRAISE THE SUN
 
 import { useState } from "react";
+import ModelViewer from "./components/ModelViewer";
 import "./App.css";
 
 function App() {
@@ -41,15 +42,7 @@ function App() {
         {/* Avatar Panel (left, 60%) */}
         <div className="avatar-panel">
           <div className="avatar-container">
-            <div className="avatar-placeholder">
-              <div className="avatar-placeholder-icon">◈</div>
-              <div className="avatar-placeholder-text">
-                VRM Avatar will render here
-              </div>
-              <div className="avatar-placeholder-sub">
-                Beatrice awaits her crown
-              </div>
-            </div>
+            <ModelViewer modelPath="/models/beatrice.glb" />
           </div>
         </div>
 
