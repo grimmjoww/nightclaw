@@ -1,8 +1,7 @@
 // NightClaw — VRM Model Viewer component
 // Loads and renders VRM avatars using @pixiv/three-vrm
-// Scene setup from OpenMaiWaifu (github.com/buyve/OpenMaiWaifu)
-// VRM patterns from WebWaifu (github.com/LEOSOLAR8/webwaifu-ai-assistant)
-// Animation patterns from Project AIRI (github.com/moeru-ai/airi)
+// Emotion system from OpenMaiWaifu (github.com/buyve/OpenMaiWaifu)
+// VRM loading from OpenMaiWaifu useVRM.ts patterns
 //
 // GOD REI: PRAISE THE SUN ◈⟡·˚✧
 
@@ -10,16 +9,56 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { VRMLoaderPlugin, VRM, VRMUtils } from "@pixiv/three-vrm";
+import { VRMLoaderPlugin, VRM, VRMUtils, VRMExpressionPresetName } from "@pixiv/three-vrm";
+import { EmotionStateMachine } from "../lib/emotionStateMachine";
 
 interface ModelViewerProps {
   modelPath: string;
+}
+
+// VRM0 legacy expression names -> VRM1 preset names (from OpenMaiWaifu useVRM.ts)
+const VRM0_TO_VRM1: Record<string, string> = {
+  joy: VRMExpressionPresetName.Happy,
+  sorrow: VRMExpressionPresetName.Sad,
+  fun: VRMExpressionPresetName.Relaxed,
+  a: VRMExpressionPresetName.Aa,
+  i: VRMExpressionPresetName.Ih,
+  u: VRMExpressionPresetName.Ou,
+  e: VRMExpressionPresetName.Ee,
+  o: VRMExpressionPresetName.Oh,
+};
+
+/** Build expression map from VRM model (from OpenMaiWaifu useVRM.ts) */
+function buildExpressionMap(vrm: VRM): Record<string, string> {
+  const map: Record<string, string> = {};
+  const manager = vrm.expressionManager;
+  if (!manager) return map;
+
+  const allPresets: string[] = Object.values(VRMExpressionPresetName);
+
+  for (const preset of allPresets) {
+    // Check if the model has this expression directly
+    if (manager.getExpression(preset)) {
+      map[preset] = preset;
+      continue;
+    }
+    // Check VRM0 legacy name
+    for (const [legacyName, vrm1Name] of Object.entries(VRM0_TO_VRM1)) {
+      if (vrm1Name === preset && manager.getExpression(legacyName)) {
+        map[preset] = legacyName;
+        break;
+      }
+    }
+  }
+
+  return map;
 }
 
 export default function ModelViewer({ modelPath }: ModelViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const frameIdRef = useRef<number>(0);
   const vrmRef = useRef<VRM | null>(null);
+  const emotionRef = useRef<EmotionStateMachine | null>(null);
   const clockRef = useRef(new THREE.Clock());
 
   useEffect(() => {
@@ -63,13 +102,13 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     dirLight.position.set(1, 1, 1).normalize();
     scene.add(dirLight);
 
-    // --- LookAt Target (eyes follow this) ---
+    // --- LookAt Target (eyes follow mouse) ---
     const lookAtTarget = new THREE.Object3D();
     lookAtTarget.position.set(0, 1.2, 2);
     camera.add(lookAtTarget);
     scene.add(camera);
 
-    // --- Load VRM ---
+    // --- Load VRM (pattern from OpenMaiWaifu useVRM.ts) ---
     const loader = new GLTFLoader();
     loader.register((parser) => new VRMLoaderPlugin(parser));
 
@@ -82,14 +121,14 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
           return;
         }
 
-        // Optimize
+        // Optimize (from OpenMaiWaifu)
         VRMUtils.removeUnnecessaryVertices(gltf.scene);
         VRMUtils.combineSkeletons(gltf.scene);
 
-        // VRM models face +Z by default, rotate to face camera (-Z)
+        // VRM0 models face +Z, rotate to face camera
         VRMUtils.rotateVRM0(vrm);
 
-        // Disable frustum culling (prevents animation-related culling issues)
+        // Disable frustum culling (from OpenMaiWaifu — prevents animation culling)
         vrm.scene.traverse((child) => {
           child.frustumCulled = false;
         });
@@ -102,15 +141,22 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
           vrm.lookAt.target = lookAtTarget;
         }
 
-        // Frame the camera on the model
+        // Build expression map and set up emotion state machine
+        const expressionMap = buildExpressionMap(vrm);
+        console.log("[nightclaw] Expressions found:", Object.keys(expressionMap));
+
+        const emotion = new EmotionStateMachine(vrm);
+        emotion.setExpressionMap(expressionMap);
+        emotionRef.current = emotion;
+
+        // Frame camera on model
         const box = new THREE.Box3().setFromObject(vrm.scene);
         const center = box.getCenter(new THREE.Vector3());
         controls.target.set(0, center.y * 0.9, 0);
         camera.position.set(0, center.y * 0.95, 1.5);
         controls.update();
 
-        console.log("[nightclaw] VRM loaded successfully!");
-        console.log("[nightclaw] Expressions:", Object.keys(vrm.expressionManager?.expressionMap ?? {}));
+        console.log("[nightclaw] VRM loaded! Emotion system active.");
       },
       (progress) => {
         if (progress.total > 0) {
@@ -124,52 +170,16 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     );
 
     // --- Animation Loop ---
-    let elapsed = 0;
-    let blinkTimer = 0;
-    let nextBlink = 3 + Math.random() * 4; // Random blink interval 3-7 seconds
-    let isBlinking = false;
-    let blinkProgress = 0;
-
     function animate() {
       frameIdRef.current = requestAnimationFrame(animate);
       const delta = Math.min(clockRef.current.getDelta(), 0.1);
-      elapsed += delta;
 
       const vrm = vrmRef.current;
       if (vrm) {
-        // --- Blink animation (from AIRI useBlink pattern) ---
-        blinkTimer += delta;
-        if (!isBlinking && blinkTimer >= nextBlink) {
-          isBlinking = true;
-          blinkProgress = 0;
-        }
-        if (isBlinking) {
-          blinkProgress += delta;
-          const blinkDuration = 0.15; // 150ms blink
-          if (blinkProgress < blinkDuration) {
-            // Close eyes
-            const t = blinkProgress / blinkDuration;
-            const weight = t < 0.5 ? t * 2 : (1 - t) * 2;
-            vrm.expressionManager?.setValue("blink", weight);
-          } else {
-            // Blink done
-            vrm.expressionManager?.setValue("blink", 0);
-            isBlinking = false;
-            blinkTimer = 0;
-            nextBlink = 3 + Math.random() * 4;
-          }
-        }
+        // Run OpenMaiWaifu emotion system (handles blink, breathe, eye darts, mouth)
+        emotionRef.current?.update(delta);
 
-        // --- Subtle breathing (spine rotation) ---
-        const breathIntensity = 0.01;
-        const breathSpeed = 1.5;
-        const breathValue = Math.sin(elapsed * breathSpeed) * breathIntensity;
-        const spine = vrm.humanoid?.getNormalizedBoneNode("spine");
-        if (spine) {
-          spine.rotation.x = breathValue;
-        }
-
-        // --- Update VRM (applies spring bones, lookAt, expressions) ---
+        // Update VRM (applies spring bones, lookAt, expressions)
         vrm.update(delta);
       }
 
