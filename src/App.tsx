@@ -42,7 +42,7 @@ function App() {
         {/* Avatar Panel (left, 60%) */}
         <div className="avatar-panel">
           <div className="avatar-container">
-            <ModelViewer modelPath="/models/beatrice.glb" />
+            <ModelViewer modelPath="/models/beatrice.vrm" />
           </div>
         </div>
 
