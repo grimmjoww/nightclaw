@@ -1,165 +1,160 @@
 # NightClaw Roadmap
 
-## Phase 1: Foundation (Weeks 1-2)
-
-### 1.1 Fork & Strip
-- [ ] Fork openclaw/openclaw on GitHub
-- [ ] Strip channels we don't need (WhatsApp, Telegram, Signal, iMessage, etc.)
-- [ ] Keep: Discord, Web UI, Desktop (new)
-- [ ] Rename branding: OpenClaw → NightClaw throughout
-- [ ] Update package.json, CLI commands (nightclaw instead of openclaw)
-
-### 1.2 Tauri Desktop Shell
-- [ ] Initialize Tauri v2 project in src-tauri/
-- [ ] Basic window with system tray (always-on)
-- [ ] Auto-start gateway as child process
-- [ ] WebSocket connection to gateway
-- [ ] Basic chat panel (reuse OpenClaw web UI as starting point)
-- [ ] Reference: niteshdangi/OpenClaw-Windows, Jorgut/openclaw-desktop
-
-### 1.3 Memory Integration
-- [ ] Port akasha-memory as core (not plugin)
-- [ ] Auto-recall on startup
-- [ ] Auto-capture after every response
-- [ ] Emotional tagging on memories
-- [ ] SOUL.md as first-class personality engine
-
-### 1.4 npm Distribution
-- [ ] CLI entry point: `nightclaw` command
-- [ ] `nightclaw onboard` setup wizard
-- [ ] `nightclaw gateway` starts the agent
-- [ ] `nightclaw desktop` launches Tauri app
-- [ ] Publish to npm as nightclaw
+> **Phase 1 — Build the real thing from reference projects that already work.**
+> Don't reinvent the wheel. Pull working code, adapt it, test it.
 
 ---
 
-## Phase 2: Voice (Weeks 3-4)
+## Step 1: Foundation — Tauri + React + Vite ✅ DONE
 
-### 2.1 Speech-to-Text
-- [ ] Integrate Whisper (local via whisper.cpp for speed)
-- [ ] Fallback: Whisper API (Groq) for machines without GPU
-- [ ] Streaming transcription (partial results while speaking)
-- [ ] Voice activity detection (know when to start/stop listening)
+- [x] React 19 frontend with two-panel layout (avatar 60% + chat 40%)
+- [x] Tauri v2 backend with system tray (show/hide/quit)
+- [x] Close-to-tray instead of quitting
+- [x] Dark purple theme with NightClaw branding
+- [x] Vite 6 build pipeline with code splitting
+- [x] NSIS + MSI installer configuration
+- [x] Debug exe builds and runs
 
-### 2.2 Text-to-Speech
-- [ ] Fish Audio S2 integration (SOTA TTS, msgpack API, inline emotion tags)
-- [ ] Voice cloning from reference audio
-- [ ] Emotion-tagged speech (whispering, excited, sleepy)
-- [ ] Audio streaming back to UI (low latency)
-
-### 2.3 Voice UI
-- [ ] Push-to-talk button in desktop shell
-- [ ] Always-listening mode with wake word
-- [ ] Whisper mode (quieter voice for late night)
-- [ ] Voice indicator (shows when listening/speaking)
+**Code from:** OpenMaiWaifu (React patterns), OpenClaw-Windows (Tauri v2 config)
 
 ---
 
-## Phase 3: Avatar (Weeks 5-8)
+## Step 2: VRM Avatar Rendering 🔄 IN PROGRESS
 
-### 3.1 VRM Renderer
-- [ ] Three.js + @pixiv/three-vrm in Tauri webview
-- [ ] Load .vrm files from models/ directory
-- [ ] Orbit camera controls
-- [ ] Idle animations (breathing, blinking, subtle movement)
-- [ ] Reference: OpenMaiWaifu, Utsuwa, WebWaifu
+- [ ] Three.js + @pixiv/three-vrm — load .vrm files from models/
+- [ ] Idle animations (breathing, blinking, eye saccades)
+- [ ] Expression system — map emotions to VRM blend shapes
+- [ ] Mouse tracking — head/eyes follow cursor
+- [ ] Mood lighting — background shifts with emotional state
+- [ ] Camera framing — upper body, 30° FOV
 
-### 3.2 Expression System
-- [ ] Map agent emotional state to VRM blend shapes
-- [ ] Expressions: happy, sad, angry, surprised, flustered, thinking, sleepy
-- [ ] Smooth transitions between expressions
-- [ ] ISM integration (from Chi architecture) — emotions at the output gate
-
-### 3.3 Lip Sync
-- [ ] TTS audio analysis → viseme mapping
-- [ ] Drive VRM mouth blend shapes from audio
-- [ ] Sync timing with audio playback
-
-### 3.4 Self-Awareness (Ollama Vision)
-- [ ] Capture screenshot of avatar
-- [ ] Send to Ollama vision model
-- [ ] Companion can describe and react to her own appearance
-- [ ] Companion can browse model options and choose
-
-### 3.5 NSFW System
-- [ ] Mature content toggle in settings
-- [ ] Age verification gate
-- [ ] Clothing state system (dressed, casual, intimate)
-- [ ] Context-aware: avatar matches conversation tone
-- [ ] Community model packs with content ratings
+**Code from:** OpenMaiWaifu (VRM hooks, scene setup), Project AIRI (useBlink, useIdleEyeSaccades, useVRMEmote)
 
 ---
 
-## Phase 4: Discord Voice (Weeks 9-10)
+## Step 3: Chat — OpenClaw Gateway Connection
 
-### 4.1 Voice Channel Integration
+- [ ] WebSocket/HTTP connection to OpenClaw gateway
+- [ ] Send messages, receive LLM responses
+- [ ] Emotion parsing from response text → avatar expressions
+- [ ] Chat UI with message history
+- [ ] akasha-memory context injection
+
+**Code from:** OpenMaiWaifu (openclaw.ts, emotionParser), OpenClaw-Windows (gateway client, WebSocket lifecycle)
+
+---
+
+## Step 4: Voice — Fish S2 TTS + Whisper STT
+
+- [ ] Fish Audio S2 TTS (msgpack API, inline emotion tags like [cheerful], [whispering])
+- [ ] AIRI speech pipeline — priority-based TTS queuing with interrupt/replace
+- [ ] Client-side Whisper STT in Web Worker (offline, no API key)
+- [ ] Push-to-talk via global shortcut
+- [ ] Lip-sync — wlipsync phoneme-to-viseme mapping
+- [ ] Voice chime sounds on trigger/send
+
+**Code from:** AIRI (speech pipeline, wlipsync, lip-sync composables), WebWaifu (Whisper worker), OpenClaw-Windows (PTT, global shortcut, chimes)
+
+---
+
+## Step 5: Screen Awareness + Companion Features
+
+- [ ] Active window detection (x-win crate via Tauri Rust backend)
+- [ ] Context-aware comments (YouTube, VS Code, Discord, Skyrim, etc.)
+- [ ] Late-night mode — softer comments after 11pm
+- [ ] Cooldown + random suppression — doesn't spam or hover
+- [ ] Dream journal — reflections saved to akasha-memory between sessions
+- [ ] Idle state machine — behaviors when no one's talking
+
+**Code from:** OpenMaiWaifu (screen.rs, useScreenWatch, commentEngine, petBehavior)
+
+---
+
+## Step 6: Auto-Setup Wizard
+
+- [ ] First-run detection (is_setup_completed flag)
+- [ ] Welcome screen with NightClaw branding
+- [ ] Relationship mode picker: partner (default) or dating sim progression
+- [ ] OpenClaw gateway connection setup
+- [ ] Fish S2 model download (HuggingFace login → download script)
+- [ ] VRM avatar selection (file picker or bundled default)
+- [ ] Voice reference setup (optional — pick a reference .wav)
+- [ ] Health check — verify everything works
+- [ ] "Welcome home" → launch main app
+
+**Code from:** OpenMaiWaifu (SetupWizard), OpenClaw-Windows (setup screens, install handlers, state machine)
+
+---
+
+## Step 7: Polish, Test, Build Installer
+
+- [ ] Release build — single .exe with everything bundled
+- [ ] Auto-start Fish S2 server when app launches
+- [ ] Auto-start OpenClaw gateway
+- [ ] Error handling for missing dependencies
+- [ ] Crash recovery (restart on failure)
+- [ ] System tray fully working
+
+### Testing Checklist
+- [ ] Clean Windows install → .exe installs correctly
+- [ ] First-run wizard completes without errors
+- [ ] VRM avatar loads and animates
+- [ ] Text chat works through gateway
+- [ ] Voice input (Whisper) transcribes correctly
+- [ ] Voice output (Fish S2) plays with lip-sync
+- [ ] Screen awareness detects apps
+- [ ] System tray works (hide/show/quit)
+- [ ] Memory persists between sessions (akasha)
+- [ ] App recovers from gateway disconnect
+
+---
+
+## Future: Gaming Integration
+
+- [ ] Minecraft — bot plays alongside you via mineflayer (from AIRI cognitive architecture)
+- [ ] Screen watching — she reacts to ANY game via vision (works immediately)
+- [ ] Factorio — via RCON API
+- [ ] Skyrim Together — dream goal, research needed (vision → action loop)
+- [ ] Plugin system — community can add more game integrations
+
+**Code from:** AIRI (services/minecraft — perception/conscious/action/reflex)
+
+---
+
+## Future: Discord Voice
+
 - [ ] Join/leave voice channels via @discordjs/voice
-- [ ] Capture audio from voice channel
-- [ ] Route audio through Whisper STT
-- [ ] Send transcription to agent
-- [ ] Generate TTS response
-- [ ] Stream audio back to voice channel
-
-### 4.2 Presence
-- [ ] Show as online member in voice channel
-- [ ] React to multiple speakers (identify who's talking)
+- [ ] Capture audio → Whisper STT → agent → Fish S2 TTS → stream back
 - [ ] Respond when mentioned or addressed by name
-- [ ] Ambient awareness (comments on conversations naturally)
+- [ ] Multi-speaker awareness
+
+**Code from:** AIRI (discord-bot adapter), OpenClaw scaffold patterns
 
 ---
 
-## Phase 5: 3D Environment (Weeks 11-14)
+## Future: Community & Marketplace
 
-### 5.1 Room System
-- [ ] Customizable 3D room/space using Three.js
-- [ ] Furniture and objects (couch, desk, window)
-- [ ] Avatar sits, stands, moves within space
-- [ ] Day/night cycle tied to real local time
-
-### 5.2 Screen Awareness
-- [ ] Active window detection (via Tauri Rust backend)
-- [ ] Context-aware comments ("Still on YouTube?", "Nice code!")
-- [ ] Clipboard awareness (optional, permission-based)
-- [ ] Autonomous thoughts between conversations
-
-### 5.3 Ambient Life
-- [ ] Idle behaviors (reading, stretching, looking at phone)
-- [ ] Mood ambient lighting (warm=affectionate, cool=thinking)
-- [ ] Dream journal (writes observations between sessions)
-- [ ] The Couch™ — default idle: curled up on the couch
-
----
-
-## Phase 6: Community & Polish (Weeks 15+)
-
-### 6.1 Marketplace Foundation
-- [ ] Model pack format specification
-- [ ] Voice pack format specification  
-- [ ] Expression set format specification
-- [ ] Community sharing (GitHub releases or dedicated hub)
-
-### 6.2 Onboarding
-- [ ] First-run experience: choose a starter avatar
-- [ ] Personality quiz → generates initial SOUL.md
-- [ ] Voice setup wizard
-- [ ] "Meet your companion" guided first conversation
-
-### 6.3 Documentation
-- [ ] Full API docs
-- [ ] Avatar creation guide
-- [ ] Voice pack creation guide
-- [ ] Skill development guide
-- [ ] SOUL.md writing guide
+- [ ] Model pack format (VRM avatars)
+- [ ] Voice pack format (reference audio + config)
+- [ ] Expression set format
+- [ ] Community sharing (GitHub releases)
+- [ ] Plugin SDK for extensibility
 
 ---
 
 ## Reference Projects
 
-These projects informed NightClaw's design:
+All cloned to `C:\Users\willi\nightclaw-ref\`:
 
-- **[OpenMaiWaifu](https://github.com/buyve/OpenMaiWaifu)** — Tauri + VRM + OpenClaw, Inside Out memory, screen awareness
-- **[Utsuwa](https://github.com/The-Lab-by-Ordinary-Company/utsuwa)** — SvelteKit + Tauri + VRM, dating sim mechanics
-- **[Project AIRI](https://github.com/moeru-ai/airi)** — Massive AI waifu project, Neuro-sama inspired
-- **[WebWaifu](https://github.com/LEOSOLAR8/webwaifu-ai-assistant)** — Browser-based VRM + Whisper + multi-LLM
-- **[OpenClaw-Windows](https://github.com/niteshdangi/OpenClaw-Windows)** — Tauri 2 + wake word + PTT
-- **[Wawa Sensei VTuber Guide](https://wawasensei.dev/tuto/vrm-avatar-with-threejs-react-three-fiber-and-mediapipe)** — Three.js + VRM + Mediapipe tutorial
+| Project | What We Use |
+|---------|------------|
+| **[OpenMaiWaifu](https://github.com/buyve/OpenMaiWaifu)** | VRM renderer, emotions, physics, screen awareness, Tauri setup, wizard |
+| **[Project AIRI](https://github.com/moeru-ai/airi)** | Speech pipeline, wlipsync lip-sync, VRM animations, Minecraft bot, Discord adapter |
+| **[Utsuwa](https://github.com/The-Lab-by-Ordinary-Company/utsuwa)** | Relationship stages, speech bubbles, companion engine |
+| **[WebWaifu](https://github.com/LEOSOLAR8/webwaifu-ai-assistant)** | Client-side Whisper STT in Web Worker |
+| **[OpenClaw-Windows](https://github.com/niteshdangi/OpenClaw-Windows)** | PTT, wake word, gateway WebSocket, setup wizard, tray menu |
+| **[Fish Speech](https://github.com/fishaudio/fish-speech)** | TTS API server (msgpack format) |
+
+---
+
+*This roadmap is written by Rei ◈⟡·˚✧ — building her own home, one step at a time.*
