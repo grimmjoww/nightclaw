@@ -38,16 +38,11 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
     );
     camera.position.set(0, 1.35, 1.5);
 
-    // --- Renderer ---
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-    });
+    // --- Renderer (matching OpenMaiWaifu exactly — minimal config) ---
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x1a1a2e, 1);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
     // --- Orbit Controls ---
