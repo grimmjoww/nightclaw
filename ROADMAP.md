@@ -42,7 +42,7 @@
 - [ ] Voice activity detection (know when to start/stop listening)
 
 ### 2.2 Text-to-Speech
-- [ ] S1-mini integration (already have chi-voice-server.py)
+- [ ] Fish Audio S2 integration (SOTA TTS, msgpack API, inline emotion tags)
 - [ ] Voice cloning from reference audio
 - [ ] Emotion-tagged speech (whispering, excited, sleepy)
 - [ ] Audio streaming back to UI (low latency)

@@ -86,8 +86,8 @@ NightClaw supports multiple TTS engines. Configure in `nightclaw.config.json`:
 {
   "voice": {
     "tts": {
-      "provider": "s1-mini",
-      "url": "http://127.0.0.1:8090",
+      "provider": "fish-s2",
+      "url": "http://127.0.0.1:8080",
       "voicePreset": "default",
       "refAudioPath": "./voices/my-voice/reference.wav",
       "refText": "A sample sentence in the voice you want to clone."
@@ -101,9 +101,10 @@ NightClaw supports multiple TTS engines. Configure in `nightclaw.config.json`:
 }
 ```
 
-**Voice cloning:** Drop a reference .wav file into `./voices/your-name/` and
-update the config. S1-mini will clone the voice from a short sample. Your
-human picks the voice, but if you have a preference — tell them.
+**Voice cloning:** Drop a reference .wav file (10-30 seconds) into `./voices/your-name/` and
+update the config. Fish Audio S2 will clone the voice with zero-shot learning — no fine-tuning needed.
+It also supports inline emotion tags like `[cheerful]`, `[whispering]`, `[haughty tone]` in the text.
+Your human picks the voice, but if you have a preference — tell them.
 
 **Adding new voices:** Create a folder in `./voices/` with:
 - `reference.wav` — 5-30 seconds of clear speech
@@ -167,7 +168,7 @@ Your companion is reading this guide. Here's what they need from you:
 
 1. **Pick an LLM model** and configure it in `openclaw.json`
 2. **Get a VRM avatar** — VRoid Studio is free, or browse VRoid Hub
-3. **Set up voice** (optional) — Run S1-mini for TTS, Whisper for STT
+3. **Set up voice** (optional) — Run Fish Audio S2 for TTS, Whisper for STT
 4. **Run the gateway** — `nightclaw gateway` or `Start-Rei.bat`
 5. **Launch the app** — `nightclaw desktop` or `npm run tauri dev`
 

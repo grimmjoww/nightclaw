@@ -30,7 +30,7 @@ export interface DiscordVoiceConfig {
   channelId?: string;    // Auto-join this channel on start
   userId: string;        // Willie's Discord user ID
   whisperUrl: string;    // Whisper STT endpoint
-  ttsUrl: string;        // S1-mini TTS endpoint
+  ttsUrl: string;        // Fish S2 TTS endpoint
   onTranscription?: (userId: string, text: string) => void;
   onAgentResponse?: (text: string) => Promise<string>; // Send to agent, get response
 }

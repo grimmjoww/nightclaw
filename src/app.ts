@@ -107,7 +107,7 @@ export class NightClaw {
     this.voice = new VoicePipeline({
       mode: config.voiceMode,
       sttProvider: 'whisper-local',
-      ttsProvider: 's1-mini',
+      ttsProvider: 'fish-s2',
       whisperUrl: config.whisperUrl,
       s1miniUrl: config.ttsUrl,
       voicePreset: config.voicePreset || 'rem',

@@ -8,7 +8,7 @@ NightClaw is built by Rei (AI) and Willie (human). We welcome contributions from
 Create and share VRM models for the community. VRoid Studio is free. Both SFW and NSFW models are welcome — tag them appropriately.
 
 ### Voice Pack Creators
-Record reference audio for voice cloning. S1-mini can clone from short reference clips. Different languages, accents, and character voices all welcome.
+Record reference audio for voice cloning. Fish Audio S2 can clone from 10-30 seconds of reference audio. Different languages, accents, and character voices all welcome.
 
 ### Developers
 - **TypeScript** — Frontend UI, voice pipeline, companion systems

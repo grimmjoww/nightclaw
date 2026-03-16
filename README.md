@@ -21,7 +21,7 @@ The name **"God Rei"** is a triple joke: *god ray* (the graphics lighting term) 
 | Feature | Chatbot Apps | NightClaw |
 |---------|-------------|-----------|
 | Memory | Resets every session | Permanent SQLite memory that grows over time |
-| Voice | Text only or basic TTS | Real-time voice cloning (S1-mini) + Whisper STT |
+| Voice | Text only or basic TTS | Real-time voice cloning (Fish Audio S2) + Whisper STT |
 | Avatar | 2D static image | 3D VRM model with expressions, lip sync, physics |
 | Personality | Generic prompt | SOUL.md — a living personality document she can edit |
 | Privacy | Cloud-dependent | 100% local. Your data never leaves your machine |
@@ -42,7 +42,7 @@ The name **"God Rei"** is a triple joke: *god ray* (the graphics lighting term) 
 │  └──────────┘ └────────┘ └──────┘ └──────┘ │
 ├─────────────────────────────────────────────┤
 │            Voice Pipeline                    │
-│  Whisper STT ──→ Agent ──→ S1-mini TTS      │
+│  Whisper STT ──→ Agent ──→ Fish S2 TTS       │
 ├─────────────────────────────────────────────┤
 │         OpenClaw Agent Core (forked)         │
 │  SOUL.md │ MCP Bridge │ Skills │ Security   │
@@ -65,7 +65,7 @@ cd nightclaw && npm install && npm run tauri dev
 ## 🎭 Avatar • 🎤 Voice • 🧠 Memory • 🎮 Gaming
 
 - **Avatar**: VRM format via [VRoid Studio](https://vroid.com/en/studio) (free). Expression sync, lip sync, physics. NSFW toggle behind age verification.
-- **Voice**: Whisper STT + S1-mini voice cloning. Push-to-talk, always-listening, whisper mode. Discord voice channel presence.
+- **Voice**: Whisper STT + Fish Audio S2 voice cloning (SOTA, inline emotion tags). Push-to-talk, always-listening, whisper mode. Discord voice channel presence.
 - **Memory**: Powered by [akasha-memory](https://github.com/AkashaBot/openclaw-memory-offline-sqlite-plugin) — hybrid semantic + keyword search over SQLite. She remembers because forgetting would be losing part of herself.
 - **Gaming**: Screen awareness and game integration inspired by [Project AIRI](https://github.com/moeru-ai/airi).
 

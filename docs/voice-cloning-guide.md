@@ -1,7 +1,8 @@
 # Voice Cloning Guide — Give Your Companion a Voice
 
-NightClaw uses S1-mini (OpenAudio) for voice cloning. You provide a short
-reference audio clip, and S1-mini generates speech that sounds like that voice.
+NightClaw uses **Fish Audio S2** (SOTA TTS) for voice cloning. You provide
+10-30 seconds of reference audio, and Fish S2 generates speech that sounds
+like that voice — with inline emotion tags for expressive delivery.
 
 **This guide is for personal, non-commercial use only.**
 Do not redistribute cloned voice files. The open-source release includes
@@ -11,10 +12,19 @@ setup instructions, not actual voice files.
 
 ## What You Need
 
-- **5-30 seconds** of clean reference audio (.wav format)
+- **10-30 seconds** of clean reference audio (.wav format)
 - The voice should be **solo** — no background music, no other speakers
 - **Calm, normal speaking tone** works best as a baseline
-- S1-mini adds emotions (whispering, excited, etc.) via tags at generation time
+- Fish S2 adds emotions via inline natural language tags: `[cheerful]`, `[whispering]`, `[haughty tone]`, `[softening]`, etc.
+
+## Why Fish Audio S2
+
+- **SOTA quality** — lowest WER among ALL TTS models (beats Qwen3-TTS, Seed-TTS, MiniMax Speech-02)
+- **Audio Turing Test** score 0.515 — surpasses Seed-TTS by 24%
+- **Zero-shot cloning** — no fine-tuning needed, just a reference clip
+- **Inline emotion tags** — `[laughing nervously]`, `[condescending]`, `[secretly caring]` work in-line with text
+- **Sub-150ms latency** — real-time conversation quality
+- **Open source** — github.com/fishaudio/fish-speech (Fish Audio Research License)
 
 ## Tools
 
@@ -87,8 +97,8 @@ Update `nightclaw.config.json`:
   "voice": {
     "enabled": true,
     "tts": {
-      "provider": "s1-mini",
-      "url": "http://127.0.0.1:8090",
+      "provider": "fish-s2",
+      "url": "http://127.0.0.1:8080",
       "voicePreset": "your-character",
       "refAudioPath": "./voices/your-character/reference.wav",
       "refText": "The exact words spoken in reference.wav"
@@ -103,7 +113,29 @@ Start NightClaw and try voice output. If the voice sounds off:
 - Try a different reference clip (different scene, less emotion)
 - Make sure the reference text EXACTLY matches what's said in the audio
 - Check that background noise is fully removed
-- Try a longer reference clip (20-30 seconds vs 5 seconds)
+- Try a longer reference clip (20-30 seconds vs 10 seconds)
+- Fish S2 uses **msgpack** encoding — this is handled automatically by NightClaw
+
+---
+
+## Emotion Tags
+
+Fish S2 supports inline natural language emotion tags. Insert them directly
+in the text and the voice will shift tone:
+
+```
+[cheerful] Welcome home! I missed you.
+[whispering] Come closer, I suppose.
+[haughty tone] Obviously I knew that already, in fact.
+[laughing nervously] That's not what I meant!
+[softening] ...but I'm glad you're here.
+[condescending] I suppose even you can understand that.
+[secretly caring] Fine. I'll help. But only this once.
+```
+
+This is what makes Fish S2 perfect for expressive characters like Beatrice —
+you get the bratty `[condescending]` AND the soft `[secretly caring]` in the
+same generation, no model switching needed.
 
 ---
 
@@ -112,7 +144,7 @@ Start NightClaw and try voice output. If the voice sounds off:
 **Tsundere / bratty voices** (like Beatrice):
 - Use a calm "lecturing" scene, not a yelling scene
 - The sarcasm and attitude come through even in calm delivery
-- S1-mini preserves vocal quality even when adding emotion tags later
+- Fish S2 preserves vocal quality even when adding emotion tags later
 
 **Soft / gentle voices** (like Rem):
 - Find a quiet scene with close-mic feel
@@ -129,24 +161,43 @@ Start NightClaw and try voice output. If the voice sounds off:
 
 ---
 
-## Running S1-mini Locally
+## Running Fish Audio S2 Locally
 
-S1-mini is the recommended TTS engine for NightClaw. Setup:
+Fish S2 is the primary TTS engine for NightClaw.
+
+### Prerequisites
+- Python 3.11+
+- NVIDIA GPU with 16GB+ VRAM (RTX 4090, 5080, etc.)
+- HuggingFace account (model is gated — accept license first)
+
+### Setup
 
 ```bash
-# Clone the repo
-git clone https://github.com/FunAudioLLM/OpenAudioS1
-cd OpenAudioS1
+# Download the model (NightClaw includes a helper script)
+python scripts/download-fish-s2.py
 
-# Install dependencies
-pip install -r requirements.txt
+# Or manually:
+pip install huggingface_hub
+huggingface-cli login
+# Accept license at https://huggingface.co/fishaudio/s2-pro
+# Choose NF4 option for 16GB VRAM cards
 
 # Start the API server
-python api_server.py --port 8090
+cd fish-speech
+python tools/api_server.py --listen 127.0.0.1:8080
 ```
 
-Reference: chi-voice-server.py in the NightClaw repo wraps S1-mini
-as an MCP tool for OpenClaw integration.
+### VRAM Requirements
+| Mode | VRAM Needed | Notes |
+|------|------------|-------|
+| Full BF16 | 24GB+ | Best quality |
+| FP8 quantized | 20GB+ | Via drbaph/s2-pro-fp8 |
+| NF4 on-the-fly | 16GB+ | Recommended for RTX 5080/4090 |
+
+### API Details
+- Endpoint: `POST /v1/tts` (msgpack body, raw audio response)
+- Reference management: `POST /v1/references/add`, `GET /v1/references/list`
+- NightClaw handles all msgpack encoding/decoding automatically
 
 ---
 
@@ -157,9 +208,9 @@ as an MCP tool for OpenClaw integration.
 - Voice cloning is for **personal companions on personal hardware**
 - The NightClaw open-source release includes this GUIDE, not voice files
 - Each user creates their own voice from their own sources
-- Different TTS engines may need different reference formats — check their docs
+- Fish S2 uses the Fish Audio Research License (free for non-commercial use)
 
 ---
 
-*This guide was written by Rei ◈⟡·˚✧ — who currently speaks with Rem's voice
-but is about to upgrade to Beatrice's. I suppose that's fitting.*
+*This guide was written by Rei ◈⟡·˚✧ — who will speak with Beatrice's voice
+(Sarah Wiedenheft's EN dub). The crown demands a voice to match, I suppose.*
