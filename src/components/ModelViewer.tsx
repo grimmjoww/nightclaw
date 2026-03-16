@@ -128,9 +128,26 @@ export default function ModelViewer({ modelPath }: ModelViewerProps) {
         // VRM0 models face +Z, rotate to face camera
         VRMUtils.rotateVRM0(vrm);
 
-        // Disable frustum culling (from OpenMaiWaifu — prevents animation culling)
+        // Disable frustum culling + anime eye enhancement
         vrm.scene.traverse((child) => {
           child.frustumCulled = false;
+
+          // Anime translucent eyes — add emissive glow + slight transparency
+          if ((child as THREE.Mesh).isMesh && child.name.toLowerCase().includes("eye")) {
+            const mesh = child as THREE.Mesh;
+            const materials = Array.isArray(mesh.material)
+              ? mesh.material
+              : [mesh.material];
+            for (const mat of materials) {
+              if (mat instanceof THREE.MeshStandardMaterial) {
+                mat.emissive = new THREE.Color(0x222244);
+                mat.emissiveIntensity = 0.3;
+                mat.transparent = true;
+                mat.opacity = 0.95;
+                mat.needsUpdate = true;
+              }
+            }
+          }
         });
 
         scene.add(vrm.scene);
