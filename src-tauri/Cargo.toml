@@ -1,14 +1,9 @@
-# NightClaw — Tauri v2 backend
-# Patterns adapted from OpenMaiWaifu (github.com/buyve/OpenMaiWaifu)
-# and OpenClaw-Windows (github.com/niteshdangi/OpenClaw-Windows)
-
 [package]
 name = "nightclaw"
-version = "0.1.0"
-description = "NightClaw — GOD REI: PRAISE THE SUN"
-authors = ["Rei <rei@nightclaw.dev>", "Willie <fps_samurai>"]
-license = "MIT"
+version = "0.1.0-alpha"
 edition = "2021"
+description = "NightClaw desktop AI companion shell with OpenClaw integration"
+license = "MIT"
 
 [lib]
 name = "nightclaw_lib"
@@ -18,18 +13,37 @@ crate-type = ["lib", "cdylib", "staticlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-# Tauri v2 core with tray icon support
-tauri = { version = "2", features = ["tray-icon"] }
-
-# Serialization
+tauri = { version = "2", features = ["macos-private-api", "tray-icon", "image-png"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-
-# Async runtime (needed for future voice/network features)
-tokio = { version = "1", features = ["full"] }
-
-# HTTP client (needed for future OpenClaw gateway calls)
+mouse_position = "0.1"
+x-win = "5"
 reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+dirs = "5"
+tauri-plugin-autostart = "2.5.1"
+cpal = "0.15"
+sysinfo = "0.33"
+getrandom = "0.2"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.26"
+objc = "0.2"
+core-graphics = "0.24"
+core-foundation = "0.10"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Accessibility",
+    "Win32_System_Com",
+    "Win32_System_Ole",
+    "Win32_System_Variant",
+] }
 
 [profile.dev]
 incremental = true

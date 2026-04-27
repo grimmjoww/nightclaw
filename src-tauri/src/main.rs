@@ -1,9 +1,7 @@
-//! NightClaw — Binary entry point.
+//! Binary entry point for the NightClaw Tauri app.
 //!
 //! In release builds, `windows_subsystem = "windows"` hides the console
 //! window on Windows. All application logic is in [`nightclaw_lib::run`].
-//!
-//! Pattern from OpenMaiWaifu (github.com/buyve/OpenMaiWaifu)
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
